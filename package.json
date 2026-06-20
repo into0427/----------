@@ -1,0 +1,8 @@
+{
+  "name": "square-battle",
+  "version": "1.0.0",
+  "description": "스퀘어배틀 - 올스타전",
+  "scripts": {
+    "start": "npx serve . -p 3000"
+  }
+}
