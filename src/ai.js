@@ -190,7 +190,9 @@ export class AIController {
     } else if (u.type === 'cannon') {
       const near = units.filter(e => !e.dead && e.team !== u.team && dist(u, e) < u.def.ult.radius * 1.1).length;
       if (near >= 1) u.useUlt(t.x, t.y, projectiles, units);
-    }
+    } else if (u. type === 'april') {
+      u.useUlt(t.x, t.y, projectiles, units);
+    }  
   }
 }
 

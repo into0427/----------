@@ -23,6 +23,8 @@ window.addEventListener('click', () => {
   }
 }, { once: true });
 
+let selectedBadge = 'tank';
+
 // ─── Select Screen ───────────────────────────────────────────────────────────
 const chars = Object.keys(CHAR_DEFS);
 let hoveredIdx = -1;
@@ -231,7 +233,7 @@ function startGame() {
   selectBGM.pause();
   selectBGM.currentTime = 0;
 
-  game = new Game(canvas, chars[selectedIdx]);
+  game = new Game(canvas, chars[selectedIdx], selectedBadge);
   game.start();
 
   // 1초 후 전투 BGM 시작

@@ -3,7 +3,7 @@ import { isWall } from './map.js';
 import { Bullet, AprilBullet, Laser, Shockwave, QuakeCone, FlameCone } from './bullet.js';
 
 export class Unit {
-  constructor(type, team, x, y) {
+  constructor(type, team, x, y, badge = null) {
     this.type = type;
     this.team = team;
     this.burstShotsLeft = 0;
@@ -12,6 +12,7 @@ export class Unit {
     this.x = x; this.y = y;
     this.kills = 0;
     this.deaths = 0;
+    this.badge = badge;
     // 타이탄은 더 크게
     if (type === 'titan')
     this.radius = 26;
@@ -24,7 +25,14 @@ export class Unit {
     this.speed = this.def.speed;
     this.facing = -Math.PI / 2;
     this.dead = false;
-    this.kills = 0;
+    // 배지   
+    if (this.badge === 'tank') {
+      this.maxHp *= 1.1;
+      this.hp = this.maxHp;
+    }
+    if (this.badge === 'speed') {
+      this.speed *= 1.1;
+    }  
 
     // 에이프릴 전용
     if (type === 'april') {

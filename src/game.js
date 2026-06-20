@@ -8,7 +8,7 @@ import { battleBGM } from './main.js';
 const RESPAWN_TIME = 3;
  
 export class Game {
-  constructor(canvas, playerCharType) {
+  constructor(canvas, playerCharType, playerBadge) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.playerCharType = playerCharType;
@@ -32,6 +32,8 @@ export class Game {
     this.lastTime = 0;
  
     this.floatingTexts = [];
+  
+    this.playerBadge = playerBadge;
   }
  
   start() {
@@ -57,7 +59,13 @@ export class Game {
  
     teamATypes.forEach((type, i) => {
       const pos = spawnA[i] || { x: TILE * 4 + i * TILE, y: TILE * 4 };
-      const unit = new Unit(type, TEAM.A, pos.x, pos.y);
+      const unit = new Unit(
+       type,
+       TEAM.A,
+       pos.x,
+       pos.y,
+       type === this.playerCharType ? this.playerBadge : null
+      );
       this.units.push(unit);
       if (type === this.playerCharType && !this.playerUnit) {
         this.playerUnit = unit;
