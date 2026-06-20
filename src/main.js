@@ -3,7 +3,26 @@ import { Game } from './game.js';
  
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
- 
+
+// =========================
+// BGM
+// =========================
+export const selectBGM = new Audio('./assets/select_bgm.mp3');
+export const battleBGM = new Audio('./assets/battle_bgm.mp3');
+
+selectBGM.loop = true;
+battleBGM.loop = true;
+
+selectBGM.volume = 0.4;
+battleBGM.volume = 0.4;
+
+// 첫 클릭 시 선택화면 BGM 시작
+window.addEventListener('click', () => {
+  if (selectBGM.paused) {
+    selectBGM.play().catch(() => {});
+  }
+}, { once: true });
+
 // ─── Select Screen ───────────────────────────────────────────────────────────
 const chars = Object.keys(CHAR_DEFS);
 let hoveredIdx = -1;
@@ -207,8 +226,18 @@ let game = null;
  
 function startGame() {
   gameStarted = true;
+
+  // 선택화면 BGM 정지
+  selectBGM.pause();
+  selectBGM.currentTime = 0;
+
   game = new Game(canvas, chars[selectedIdx]);
   game.start();
+
+  // 1초 후 전투 BGM 시작
+  setTimeout(() => {
+    battleBGM.play().catch(() => {});
+  }, 1000);
 }
  
 // Select screen render loop

@@ -3,7 +3,8 @@ import { generateMap, drawMap, isWall } from './map.js';
 import { Unit } from './unit.js';
 import { AIController } from './ai.js';
 import { PlayerController } from './player.js';
- 
+import { battleBGM } from './main.js'; 
+
 const RESPAWN_TIME = 3;
  
 export class Game {
@@ -318,6 +319,18 @@ export class Game {
   }
  
   drawGameOver(ctx) {
+    if (!this._battleFadeStarted) {
+      this._battleFadeStarted = true;
+      const fade = setInterval(() => {
+        battleBGM.volume -= 0.02;
+        if (battleBGM.volume <= 0) {
+          battleBGM.volume = 0;
+          battleBGM.pause();
+          clearInterval(fade);
+        }
+      }, 100);
+    }    
+    
     const player = this.playerUnit || {
      kills: 0,
      deaths: 0
