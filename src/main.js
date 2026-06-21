@@ -126,7 +126,7 @@ function drawSelectScreen() {
   // Subtitle
   ctx.font = '13px Arial';
   ctx.fillStyle = '#7777aa';
-  ctx.fillText('팀전 4:4  ·  20킬 선취 승리  ·  탑뷰 배틀', CANVAS_W / 2, 148);
+  ctx.fillText('팀전 4:4  ·  20킬 선취 승리  ·  탑뷰 배틀  ..브롤스타즈 짝퉁 아님', CANVAS_W / 2, 148);
  
   chars.forEach((id, i) => {
     const def = CHAR_DEFS[id];
