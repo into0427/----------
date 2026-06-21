@@ -51,14 +51,18 @@ export class PlayerController {
   }
 
   doAttack(u, wx, wy, projectiles, units) {
+  
+    let cooldownMult =
+    u.comebackActive ? 0.9 : 1;
+    
     if (u.type === 'tyranno') {
       if (u.ultActive) {
         // 궁극기 중 화염: startSwing(true) → executeHit → FlameCone
         u.startSwing(true);
-        u.attackCooldown = u.def.ult.cooldown;
+        u.attackCooldown = u.def.ult.cooldown * cooldownMult;
       } else {
         u.startSwing(false);
-        u.attackCooldown = u.def.attack.windup + u.def.attack.recovery + 0.05;
+        u.attackCooldown = (u.def.attack.windup + u.def.attack.recovery + 0.05) * cooldownMult;
       }
       return;
     }
@@ -66,7 +70,7 @@ export class PlayerController {
     if (u.type === 'titan') {
       // 일반 공격 스윙
       u.startSwing(false);
-     u.attackCooldown = u.def.attack.cooldown;
+     u.attackCooldown = u.def.attack.cooldown * cooldownMult;
      return;
     }
 
@@ -79,10 +83,10 @@ export class PlayerController {
     // 총기 (reddy, bluey)
     if (u.ultActive && u.type === 'reddy') {
       u.fireBullet(projectiles, wx, wy, true);
-      u.attackCooldown = u.def.ult.cooldown;
+      u.attackCooldown = u.def.ult.cooldown * cooldownMult;
     } else {
       u.fireBullet(projectiles, wx, wy, false);
-      u.attackCooldown = u.def.attack.cooldown;
+      u.attackCooldown = u.def.attack.cooldown * cooldownMult;
     }
   }
 }

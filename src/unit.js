@@ -1,4 +1,4 @@
-import { CHAR_DEFS, MAP_W, MAP_H, TILE } from './constants.js';
+import { CHAR_DEFS, MAP_W, MAP_H, TILE, TEAM } from './constants.js';
 import { isWall } from './map.js';
 import { Bullet, AprilBullet, Laser, Shockwave, QuakeCone, FlameCone } from './bullet.js';
 
@@ -13,6 +13,8 @@ export class Unit {
     this.kills = 0;
     this.deaths = 0;
     this.badge = badge;
+    this.respawnBoost = 0;
+    this.comebackActive = false;
     // 타이탄은 더 크게
     if (type === 'titan')
     this.radius = 26;
@@ -33,6 +35,9 @@ export class Unit {
     if (this.badge === 'speed') {
       this.speed *= 1.1;
     }  
+    if (this.badge === 'ultimate') {
+      this.def.ult.charge *= 0.9;
+    }
 
     // 에이프릴 전용
     if (type === 'april') {
@@ -118,6 +123,16 @@ export class Unit {
   }  
     
     if (this.dead) return;
+    if (
+     attacker &&
+     attacker.badge === 'vampire'
+    ) {
+      attacker.hp = Math.min(
+        attacker.maxHp,
+        attacker.hp + amount * 0.1
+      );
+    }
+    
     this.hp -= amount;
     this.flashTimer = 0.15;
     if (this.hp <= 0) {
@@ -142,8 +157,12 @@ export class Unit {
   move(dx, dy, dt) {
     const len = Math.hypot(dx, dy);
     if (len === 0) return;
-    const nx = (dx / len) * this.speed;
-    const ny = (dy / len) * this.speed;
+    let speed = this.speed;
+    if (this.badge === 'respawn' && this.respawnBoost > 0) {
+      speed *= 1.5;
+    }
+    const nx = (dx / len) * speed;
+    const ny = (dy / len) * speed;
     const nx2 = this.x + nx;
     const ny2 = this.y + ny;
     if (!isWall(nx2, this.y) && nx2 > this.radius && nx2 < MAP_W - this.radius) this.x = nx2;
@@ -179,6 +198,7 @@ export class Unit {
   }
       
     if (this.dead) return;
+    if (this.respawnBoost > 0) {this.respawnBoost -= dt;}
     if (this.flashTimer > 0) this.flashTimer -= dt;
     if (this.stunTimer > 0) { this.stunTimer -= dt; return; }
     if (!this.ultActive) this.ultCharge += dt;
@@ -238,6 +258,21 @@ export class Unit {
             this.burstTimer = this.def.attack.burstDelay;
           }
         }
+      }
+    
+    if (this.badge === 'attention' && !this.ultReady) {
+      const enemyNear = units.some(u => !u.dead && u.team !== this.team && Math.hypot(u.x - this.x, u.y - this.y) <= 90);
+      if (enemyNear) {
+        this.ultCharge += 1 * dt;
+      }
+    }
+    
+    if (
+     this.badge === 'survivor' &&
+     this.hp > 0 &&
+     this.hp <= this.maxHp * 0.3
+    ) {
+        this.hp += this.maxHp * 0.02 * dt;  
       }
 
     this.updateSwing(dt, units, projectiles);

@@ -23,7 +23,17 @@ window.addEventListener('click', () => {
   }
 }, { once: true });
 
-let selectedBadge = 'tank';
+let selectedBadge = 'tank'
+const BADGES = [
+  { id: 'tank', name: '🛡️ 탱커' },
+  { id: 'speed', name: '⚡ 신속' },
+  { id: 'survivor', name: '❤️ 생명력' },
+  { id: 'respawn', name: '🏃 복귀' },
+  { id: 'vampire', name: '🧛 흡혈' },
+  { id: 'attention', name: '👀 관종' },
+  { id: 'ult', name: '💥 궁극기' },
+  { id: 'comeback', name: '🔥 역전' }
+];
 
 // ─── Select Screen ───────────────────────────────────────────────────────────
 const chars = Object.keys(CHAR_DEFS);
@@ -60,6 +70,29 @@ chars.forEach(id => {
   const img = new Image();
   img.src = `assets/${id}.png`;
   charImages[id] = img;
+});
+
+// ====================
+// 배지 선택창
+// ====================
+ctx.fillStyle = '#ffffff';
+ctx.font = 'bold 18px Arial';
+ctx.textAlign = 'center';
+ctx.fillText('배지 선택', CANVAS_W / 2, 540);
+BADGES.forEach((badge, i) => {
+  const x = 90 + i * 90;
+  const y = 560;
+  const w = 80;
+  const h = 40;
+  const selected = selectedBadge === badge.id;
+  ctx.fillStyle = selected ? '#4488ff' : 'rgba(255,255,255,0.1)';
+  ctx.strokeStyle = selected ? '#ffffff' : '#666';
+  ctx.lineWidth = selected ? 3 : 1;
+  ctx.fillRect(x, y, w, h);
+  ctx.strokeRect(x, y, w, h);
+  ctx.fillStyle = 'white';
+  ctx.font = '11px Arial';
+  ctx.fillText(badge.name, x + w / 2, y + 24);
 });
 
 function getCardRect(i) {
@@ -153,7 +186,7 @@ function drawSelectScreen() {
  
   // Start button
   if (selectedIdx >= 0) {
-    const bx = CANVAS_W / 2 - 100, by = CANVAS_H - 80;
+    const bx = CANVAS_W / 2 - 100, by = 150;
     ctx.save();
     ctx.fillStyle = '#4488ff';
     ctx.shadowColor = '#4488ff';
@@ -165,12 +198,30 @@ function drawSelectScreen() {
     ctx.textAlign = 'center';
     ctx.fillStyle = 'white';
     ctx.fillText('게임 시작!', CANVAS_W / 2, by + 30);
-  } else {
-    ctx.font = '14px Arial';
-    ctx.fillStyle = '#666688';
-    ctx.textAlign = 'center';
-    ctx.fillText('캐릭터를 클릭해 선택하세요', CANVAS_W / 2, CANVAS_H - 55);
   }
+  
+  // ====================
+  // 배지 선택창
+  // ====================
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 18px Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('배지 선택', CANVAS_W / 2, 540);
+  BADGES.forEach((badge, i) => {
+    const x = 90 + i * 90;
+    const y = 560;
+    const w = 80;
+    const h = 40;
+    const selected = selectedBadge === badge.id;
+    ctx.fillStyle = selected ? '#4488ff' : 'rgba(255,255,255,0.1)';
+    ctx.strokeStyle = selected ? '#ffffff' : '#666';
+    ctx.lineWidth = selected ? 3 : 1;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeRect(x, y, w, h);
+    ctx.fillStyle = 'white';
+    ctx.font = '11px Arial';
+    ctx.fillText(badge.name, x + w / 2, y + 24);
+  });
 }
  
 function roundRect(ctx, x, y, w, h, r) {
@@ -213,9 +264,26 @@ canvas.addEventListener('click', e => {
     }
   });
  
+  BADGES.forEach((badge, i) => {
+
+   const x = 90 + i * 90;
+   const y = 560;
+   const w = 80;
+   const h = 40;
+
+   if (
+     mx >= x &&
+     mx <= x + w &&
+     my >= y &&
+     my <= y + h
+   ) {
+     selectedBadge = badge.id;
+   }
+  });
+
   // Start button
   if (selectedIdx >= 0) {
-    const bx = CANVAS_W / 2 - 100, by = CANVAS_H - 80;
+    const bx = CANVAS_W / 2 - 100, by = 150;
     if (mx >= bx && mx <= bx + 200 && my >= by && my <= by + 48) {
       startGame();
     }

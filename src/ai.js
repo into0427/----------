@@ -134,11 +134,15 @@ export class AIController {
     const u = this.unit;
     if (d > atkRange) return; // 사거리 밖이면 공격 안 함
 
+
+    let cooldownMult =
+    u.comebackActive ? 0.9 : 1;
+
     if (u.ultActive && u.type === 'tyranno') {
       if (u.attackCooldown <= 0) {
         // 궁극기 중 화염 공격 (startSwing으로 FlameCone 발동)
         u.startSwing(true);
-        u.attackCooldown = u.def.ult.cooldown;
+        u.attackCooldown = u.def.ult.cooldown * cooldownMult;
         this.attackTimer = u.def.ult.cooldown + 0.1;
       }
       return;
@@ -146,14 +150,14 @@ export class AIController {
 
     if (u.type === 'tyranno') {
       u.startSwing(false);
-      u.attackCooldown = u.def.attack.windup + u.def.attack.recovery + 0.05;
+      u.attackCooldown = (u.def.attack.windup + u.def.attack.recovery + 0.05) * cooldownMult;
       this.attackTimer = u.def.attack.windup + u.def.attack.recovery + 0.15;
       return;
     }
 
     if (u.type === 'titan') {
       u.startSwing(false);
-      u.attackCooldown = u.def.attack.windup + u.def.attack.recovery + 0.1;
+      u.attackCooldown = (u.def.attack.windup + u.def.attack.recovery + 0.1) * cooldownMult;
       this.attackTimer = u.def.attack.windup + u.def.attack.recovery + 0.2;
       return;
     }
@@ -168,11 +172,11 @@ export class AIController {
     // 총기 캐릭터 (reddy, bluey)
     if (u.ultActive && u.type === 'reddy') {
       u.fireBullet(projectiles, target.x, target.y, true);
-      u.attackCooldown = u.def.ult.cooldown;
+      u.attackCooldown = u.def.ult.cooldown * cooldownMult;
       this.attackTimer = u.def.ult.cooldown;
     } else {
       u.fireBullet(projectiles, target.x, target.y, false);
-      u.attackCooldown = u.def.attack.cooldown;
+      u.attackCooldown = u.def.attack.cooldown * cooldownMult;
       this.attackTimer = u.def.attack.cooldown;
     }
   }

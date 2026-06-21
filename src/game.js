@@ -48,7 +48,22 @@ export class Game {
     const shuffle = arr => arr.sort(() => Math.random() - 0.5);
     const teamATypes = shuffle([...types]).slice(0, 4);
     const teamBTypes = shuffle([...types]).slice(0, 4);
- 
+    const BADGE_IDS = [
+    'tank',
+    'speed',
+    'survivor',
+    'respawn',
+    'vampire',
+    'attention',
+    'ult',
+    'comeback'
+    ];
+    function randomBadge() {
+      return BADGE_IDS[
+      Math.floor(Math.random() * BADGE_IDS.length)
+      ];
+    }
+
     // Ensure player type is in team A
     if (!teamATypes.includes(this.playerCharType)) {
       teamATypes[0] = this.playerCharType;
@@ -59,14 +74,18 @@ export class Game {
  
     teamATypes.forEach((type, i) => {
       const pos = spawnA[i] || { x: TILE * 4 + i * TILE, y: TILE * 4 };
-      const unit = new Unit(
+      const unit = new Unit( 
        type,
        TEAM.A,
        pos.x,
        pos.y,
-       type === this.playerCharType ? this.playerBadge : null
+       type === this.playerCharType ? this.playerBadge : randomBadge()
       );
+      unit.game = this;
       this.units.push(unit);
+      console.log(
+     `[TEAM A] ${type} → ${unit.badge}`
+      );
       if (type === this.playerCharType && !this.playerUnit) {
         this.playerUnit = unit;
         this.playerCtrl = new PlayerController(unit, this.canvas);
@@ -77,8 +96,12 @@ export class Game {
  
     teamBTypes.forEach((type, i) => {
       const pos = spawnB[i] || { x: MAP_W - TILE * 5 + i * TILE, y: MAP_H - TILE * 5 };
-      const unit = new Unit(type, TEAM.B, pos.x, pos.y);
+      const unit = new Unit(type, TEAM.B, pos.x, pos.y, randomBadge());
+      unit.game = this;
       this.units.push(unit);
+      console.log(
+     `[TEAM B] ${type} → ${unit.badge}`
+      );
       this.controllers.push({ unit, ctrl: new AIController(unit) });
     });
   }
@@ -113,7 +136,20 @@ export class Game {
     // Count kills
     this.killsA = this.units.filter(u => u.team === TEAM.A).reduce((s, u) => s + (u.kills || 0), 0);
     this.killsB = this.units.filter(u => u.team === TEAM.B).reduce((s, u) => s + (u.kills || 0), 0);
- 
+    
+    for (const u of this.units) {
+      if (u.badge !== 'comeback') continue;
+      const losing = (u.team === TEAM.A && this.killsA < this.killsB) || (u.team === TEAM.B && this.killsB < this.killsA);
+      if (losing && !u.comebackActive) {
+        u.comebackActive = true;
+        u.speed *= 1.1;
+      }
+      if (!losing && u.comebackActive) {
+        u.comebackActive = false;
+        u.speed /= 1.1;
+      }
+    }
+
     if (this.killsA >= WIN_KILLS) { this.over = true; this.winner = TEAM.A; return; }
     if (this.killsB >= WIN_KILLS) { this.over = true; this.winner = TEAM.B; return; }
  
@@ -191,7 +227,10 @@ export class Game {
     unit.ultActive = false;
     unit.riding = false;
     unit.speed = unit.def.speed;
- 
+    if (unit.badge === 'respawn') {
+      unit.respawnBoost = 5;
+    }
+
     const side = unit.team === TEAM.A;
     const cx = side ? TILE * 4 : MAP_W - TILE * 5;
     const cy = side ? TILE * 4 : MAP_H - TILE * 5;
