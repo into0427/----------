@@ -32,7 +32,7 @@ export class Game {
     this.lastTime = 0;
  
     this.floatingTexts = [];
-  
+    this.killLogs = [];
     this.playerBadge = playerBadge;
   }
  
@@ -284,6 +284,18 @@ export class Game {
     // HUD
     this.drawHUD(ctx);
  
+    // 킬 로그
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 14px Arial';
+    for (let i = 0; i < this.killLogs.length; i++) {
+      const log = this.killLogs[i];
+      ctx.fillStyle =
+      log.team === TEAM.A
+      ? '#4aa3ff'
+      : '#ff5555';
+      ctx.fillText(`${log.killer} → ${log.victim}`, CANVAS_W - 15, 40 + i * 20);
+    }
+
     // Floating texts
     for (const t of this.floatingTexts) {
       const sx = t.x - camX, sy = t.y - camY;

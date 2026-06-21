@@ -2,6 +2,17 @@ import { CHAR_DEFS, MAP_W, MAP_H, TILE, TEAM } from './constants.js';
 import { isWall } from './map.js';
 import { Bullet, AprilBullet, Laser, Shockwave, QuakeCone, FlameCone } from './bullet.js';
 
+const BADGE_ICONS = {
+  tank: '🛡️',
+  speed: '⚡',
+  survivor: '❤️',
+  respawn: '🏃',
+  vampire: '🧛',
+  attention: '👀',
+  ult: '💥',
+  comeback: '🔥'
+};
+
 export class Unit {
   constructor(type, team, x, y, badge = null) {
     this.type = type;
@@ -29,14 +40,14 @@ export class Unit {
     this.dead = false;
     // 배지   
     if (this.badge === 'tank') {
-      this.maxHp *= 1.1;
+      this.maxHp *= 1.2;
       this.hp = this.maxHp;
     }
     if (this.badge === 'speed') {
-      this.speed *= 1.1;
+      this.speed *= 1.25;
     }  
     if (this.badge === 'ultimate') {
-      this.def.ult.charge *= 0.9;
+      this.def.ult.charge *= 0.8;
     }
 
     // 에이프릴 전용
@@ -134,9 +145,27 @@ export class Unit {
     }
     
     this.hp -= amount;
+    let damageColor = '#ffffff';
+    if (amount >= 400) damageColor = '#ff0202';
+    else if (amount >= 250) damageColor = '#ffcc00';
+    else if (amount >= 100) damageColor = '#ff9900';
+
+    if (this.game) {
+      this.game.floatingTexts.push({ text: `${Math.round(amount)}`, x: this.x, y: this.y - 10, life: 0.8, color: damageColor });
+    }
     this.flashTimer = 0.15;
     if (this.hp <= 0) {
       this.hp = 0;
+      if (attacker && attacker.game) {
+        attacker.game.killLogs.unshift({
+          killer: attacker.def.name,
+          victim: this.def.name,
+          team: attacker.team
+        });
+        if (attacker.game.killLogs.length > 5) {
+          attacker.game.killLogs.pop();
+        }
+      }
       this.die(attacker);
     }
   }
@@ -412,6 +441,7 @@ export class Unit {
         x: this.x, y: this.y, angle, speed: 520,
         damage: def.damage, radius: def.bulletR, color: def.bulletColor,
         pierce: false, team: this.team, owner: this,
+        maxRange: def.range
       }));
       // 반동
       this.x -= Math.cos(angle) * this.def.attack.recoil;
@@ -576,6 +606,15 @@ export class Unit {
     ctx.fillRect(sx - BW/2, sy - 28, BW, 3);
     ctx.fillStyle = this.ultReady ? '#dd44ff' : '#7722aa';
     ctx.fillRect(sx - BW/2, sy - 28, BW * ultFrac, 3);
+
+  // 배지
+    const badgeIcon = BADGE_ICONS[this.badge];
+    if (badgeIcon) {
+      ctx.font = '14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'white';
+      ctx.fillText(badgeIcon, sx + BW/2 - 50, sy - 42);
+    }
   }
 
   // ─── 캐릭터별 그리기 ──────────────────────────────────────────────────────
